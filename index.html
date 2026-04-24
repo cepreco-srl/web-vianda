@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viands Sur — Catering corporativo para empresas que se toman en serio el almuerzo</title>
+<meta name="description" content="Catering corporativo en CABA y GBA. Resolvemos el almuerzo diario en oficinas: plato principal, ensalada y dieta. Cocina propia y entrega puntual.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ---------------------------------------------------
+   CORE TOKENS
+   Paleta y variables. Todo nace de acá.
+   --------------------------------------------------- */
+:root {
+  /* Superficies */
+  --cream: #F5EFE6;
+  --cream-warm: #EDE5D6;
+  --cream-deep: #E5DAC5;
+  --paper: #FAF6EE;
+
+  /* Tinta */
+  --ink: #1C1A17;
+  --ink-soft: #2C2824;
+  --ink-muted: #6B6459;
+  --ink-faded: #A39B8D;
+
+  /* Acento */
+  --orange: #D4501F;
+  --orange-deep: #A63A14;
+  --orange-wash: #E8A880;
+  --terracotta: #8B3A1F;
+
+  /* Funcionales */
+  --line: rgba(28, 26, 23, 0.12);
+  --line-strong: rgba(28, 26, 23, 0.24);
+
+  /* Tipografía */
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Instrument Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Espaciado */
+  --pad-page: clamp(20px, 4vw, 48px);
+  --gap-section: clamp(80px, 12vw, 160px);
+}
+
+/* ---------------------------------------------------
+   RESET & BASE
+   --------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Grain texture sutil sobre todo el sitio — da textura de papel */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, textarea, select { font: inherit; color: inherit; }
+
+::selection { background: var(--orange); color: var(--cream); }
+
+/* ---------------------------------------------------
+   TIPOGRAFÍA
+   Jerarquía fuerte. Fraunces con ajustes ópticos.
+   --------------------------------------------------- */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 0;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.display--italic {
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+}
+
+h1.display { font-size: clamp(52px, 10vw, 148px); }
+h2.display { font-size: clamp(40px, 7vw, 92px); }
+h3.display { font-size: clamp(28px, 4vw, 48px); }
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.lede {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-variation-settings: "opsz" 36, "SOFT" 60;
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.35;
+  color: var(--ink-soft);
+  letter-spacing: -0.015em;
+}
+
+/* ---------------------------------------------------
+   NAV
+   Sticky, cream con blur leve. Sin sombras tontas.
+   --------------------------------------------------- */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px var(--pad-page);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245, 239, 230, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.nav.scrolled { border-bottom-color: var(--line); }
+
+.nav__brand {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 50;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.nav__brand span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav__links {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+}
+
+.nav__links a {
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  padding: 4px 0;
+}
+
+.nav__links a::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.nav__links a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.nav__cta {
+  padding: 10px 20px;
+  background: var(--orange);
+  color: var(--cream);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background 0.25s ease;
+}
+
+.nav__cta:hover { background: var(--orange-deep); }
+
+@media (max-width: 768px) {
+  .nav__links { display: none; }
+}
+
+/* ---------------------------------------------------
+   HERO
+   Layout asimétrico. Serif gigante. Strip de meta arriba.
+   --------------------------------------------------- */
+.hero {
+  min-height: 100vh;
+  padding: 140px var(--pad-page) 60px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 80px;
+  position: relative;
+}
+
+.hero__meta {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.hero__meta span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); }
+
+.hero__headline {
+  align-self: center;
+}
+
+.hero__headline h1 {
+  max-width: 14ch;
+}
+
+.hero__headline .highlight {
+  color: var(--orange);
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1;
+}
+
+.hero__bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: end;
+  border-top: 1px solid var(--line);
+  padding-top: 32px;
+}
+
+.hero__manifesto {
+  max-width: 48ch;
+}
+
+.hero__manifesto p {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.hero__manifesto p + p { margin-top: 14px; }
+
+.hero__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 28px;
+  background: var(--orange);
+  color: var(--cream);
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.btn-primary:hover { background: var(--orange-deep); transform: translateY(-2px); }
+
+.btn-primary svg { transition: transform 0.3s ease; }
+.btn-primary:hover svg { transform: translate(4px, -4px); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 3px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+
+@media (max-width: 768px) {
+  .hero__bottom { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ---------------------------------------------------
+   MARQUEE / TICKER
+   Banda con valores que rota.
+   --------------------------------------------------- */
+.ticker {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 20px 0;
+  overflow: hidden;
+  border-top: 1px solid var(--ink-soft);
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.ticker__track {
+  display: flex;
+  gap: 60px;
+  white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+  width: max-content;
+}
+
+.ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 60px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+}
+
+.ticker__item::after {
+  content: "◉";
+  color: var(--orange);
+  font-size: 12px;
+}
+
+.ticker__item:last-child::after { display: none; }
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------------------------------------------------
+   SECTIONS — base común
+   --------------------------------------------------- */
+.section {
+  padding: var(--gap-section) var(--pad-page);
+  position: relative;
+}
+
+.section__header {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  margin-bottom: 80px;
+  border-top: 1px solid var(--ink);
+  padding-top: 24px;
+}
+
+.section__number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.section__title {
+  max-width: 18ch;
+}
+
+@media (max-width: 768px) {
+  .section__header { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* ---------------------------------------------------
+   PROPUESTA — tres diferenciales
+   --------------------------------------------------- */
+.propuesta__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.pillar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+
+.pillar:nth-child(2) { transform: translateY(60px); }
+.pillar:nth-child(3) { transform: translateY(30px); }
+
+.pillar__num {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1;
+  color: var(--orange);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pillar h3 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-variation-settings: "opsz" 36, "SOFT" 30;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.pillar p {
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .propuesta__grid { grid-template-columns: 1fr; gap: 32px; }
+  .pillar:nth-child(2), .pillar:nth-child(3) { transform: none; }
+}
+
+/* ---------------------------------------------------
+   PLANES — filas editoriales en vez de cards
+   --------------------------------------------------- */
+.planes { background: var(--cream-warm); }
+
+.plan {
+  display: grid;
+  grid-template-columns: 80px 1fr 1.5fr auto;
+  gap: 40px;
+  align-items: start;
+  padding: 48px 0;
+  border-top: 1px solid var(--line-strong);
+  position: relative;
+  transition: padding 0.4s ease;
+}
+
+.plan:last-child { border-bottom: 1px solid var(--line-strong); }
+
+.plan:hover { padding-left: 12px; }
+
+.plan__letter {
+  font-family: var(--font-display);
+  font-size: 84px;
+  line-height: 0.9;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  transition: color 0.3s ease;
+}
+
+.plan:hover .plan__letter { color: var(--orange); }
+
+.plan__name {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-variation-settings: "opsz" 72, "SOFT" 30;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+}
+
+.plan__tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+.plan__desc {
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.plan__features {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plan__features li {
+  font-size: 13px;
+  padding: 6px 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--ink-soft);
+}
+
+.plan__arrow {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.plan:hover .plan__arrow {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+@media (max-width: 900px) {
+  .plan { grid-template-columns: 60px 1fr; }
+  .plan__letter { font-size: 56px; }
+  .plan__details { grid-column: 1 / -1; }
+  .plan__arrow { grid-column: 2; justify-self: end; }
+}
+
+/* ---------------------------------------------------
+   PROCESO — timeline vertical con números gigantes
+   --------------------------------------------------- */
+.proceso__list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  gap: 40px;
+  padding: 40px 0;
+  border-top: 1px solid var(--line);
+  align-items: baseline;
+}
+
+.step:last-child { border-bottom: 1px solid var(--line); }
+
+.step__num {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 10vw, 120px);
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 70, "WONK" 1;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--orange);
+}
+
+.step__content h4 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 36px);
+  font-variation-settings: "opsz" 72, "SOFT" 30;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.step__content p {
+  color: var(--ink-muted);
+  max-width: 50ch;
+  line-height: 1.55;
+}
+
+.step__duration {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--orange);
+  font-weight: 500;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .step { grid-template-columns: 1fr; gap: 16px; }
+  .step__duration { text-align: left; }
+}
+
+/* ---------------------------------------------------
+   CONFIANZA — números + logos
+   --------------------------------------------------- */
+.confianza { background: var(--ink); color: var(--cream); }
+
+.confianza .section__header { border-top-color: var(--ink-faded); color: var(--cream); }
+.confianza .section__number { color: var(--ink-faded); }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  margin-bottom: 80px;
+}
+
+.stat {
+  border-top: 1px solid var(--ink-soft);
+  padding-top: 24px;
+}
+
+.stat__num {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 7vw, 96px);
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--cream);
+  margin-bottom: 12px;
+}
+
+.stat__num .unit {
+  color: var(--orange);
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1;
+}
+
+.stat__label {
+  font-size: 14px;
+  color: var(--ink-faded);
+  line-height: 1.4;
+  max-width: 20ch;
+}
+
+.quote {
+  border-top: 1px solid var(--ink-soft);
+  padding-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+}
+
+.quote__text {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.2vw, 42px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
+  color: var(--cream);
+}
+
+.quote__text::before {
+  content: "«";
+  color: var(--orange);
+  font-size: 1.5em;
+  line-height: 0;
+  vertical-align: -0.2em;
+  margin-right: 0.1em;
+}
+
+.quote__text::after { content: "»"; color: var(--orange); }
+
+.quote__attr {
+  border-top: 1px solid var(--ink-soft);
+  padding-top: 16px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quote__attr strong { font-family: var(--font-display); font-size: 18px; font-weight: 500; }
+.quote__attr span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faded); }
+
+@media (max-width: 900px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .quote { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------
+   FAQ
+   --------------------------------------------------- */
+.faq__list {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq__item {
+  border-top: 1px solid var(--line-strong);
+  overflow: hidden;
+}
+
+.faq__item:last-child { border-bottom: 1px solid var(--line-strong); }
+
+.faq__q {
+  width: 100%;
+  padding: 28px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-variation-settings: "opsz" 36, "SOFT" 30;
+  letter-spacing: -0.015em;
+  transition: color 0.2s ease;
+}
+
+.faq__q:hover { color: var(--orange); }
+
+.faq__toggle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.faq__item.open .faq__toggle {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--cream);
+  transform: rotate(45deg);
+}
+
+.faq__a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.faq__a-inner {
+  padding: 0 0 28px 0;
+  color: var(--ink-muted);
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+.faq__item.open .faq__a { max-height: 400px; }
+
+/* ---------------------------------------------------
+   CONTACTO / FORM
+   --------------------------------------------------- */
+.contacto { background: var(--cream-deep); }
+
+.contacto__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.contacto__intro h2 {
+  margin-bottom: 24px;
+  max-width: 12ch;
+}
+
+.contacto__intro p {
+  color: var(--ink-soft);
+  font-size: 18px;
+  line-height: 1.55;
+  max-width: 40ch;
+  margin-bottom: 32px;
+}
+
+.contact-card {
+  border-top: 1px solid var(--line-strong);
+  padding-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contact-card a {
+  color: var(--ink);
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 16px;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 2px;
+  transition: border-color 0.2s ease;
+}
+
+.contact-card a:hover { border-color: var(--ink); }
+
+.form {
+  background: var(--paper);
+  padding: 40px;
+  border: 1px solid var(--line);
+}
+
+.form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form__group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.form__group label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.form__group input,
+.form__group select,
+.form__group textarea {
+  width: 100%;
+  padding: 12px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  font-size: 17px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.form__group input:focus,
+.form__group select:focus,
+.form__group textarea:focus {
+  border-bottom-color: var(--orange);
+}
+
+.form__group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%231C1A17' stroke-width='1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  padding-right: 24px;
+  cursor: pointer;
+}
+
+.form__group textarea { resize: vertical; min-height: 100px; }
+
+.form__submit {
+  width: 100%;
+  padding: 20px;
+  background: var(--orange);
+  color: var(--cream);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background 0.3s ease;
+}
+
+.form__submit:hover { background: var(--orange-deep); }
+
+.form__submit svg { transition: transform 0.3s ease; }
+.form__submit:hover svg { transform: translateX(4px); }
+
+.form__note {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 16px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .contacto__grid { grid-template-columns: 1fr; gap: 48px; }
+  .form__row { grid-template-columns: 1fr; gap: 0; }
+  .form { padding: 28px; }
+}
+
+/* ---------------------------------------------------
+   FOOTER
+   --------------------------------------------------- */
+.footer {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 80px var(--pad-page) 40px;
+}
+
+.footer__hero {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 10vw, 160px);
+  font-variation-settings: "opsz" 144, "SOFT" 60, "WONK" 1;
+  font-style: italic;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  margin-bottom: 80px;
+  color: var(--cream);
+}
+
+.footer__hero span { color: var(--orange); }
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  border-top: 1px solid var(--ink-soft);
+  padding-top: 40px;
+}
+
+.footer__col h5 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faded);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.footer__col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer__col a { color: var(--cream); font-size: 15px; opacity: 0.8; transition: opacity 0.2s ease; }
+.footer__col a:hover { opacity: 1; }
+
+.footer__brand p {
+  color: var(--ink-faded);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 36ch;
+}
+
+.footer__bottom {
+  border-top: 1px solid var(--ink-soft);
+  margin-top: 60px;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faded);
+}
+
+@media (max-width: 900px) {
+  .footer__grid { grid-template-columns: 1fr 1fr; }
+  .footer__bottom { flex-direction: column; gap: 8px; }
+}
+
+/* ---------------------------------------------------
+   WHATSAPP FLOATING ACTION BUTTON (FAB)
+   Verde oficial, pulso sutil, respeta reduced-motion.
+   --------------------------------------------------- */
+.wpp-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 200;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #25D366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 28px rgba(37, 211, 102, 0.38), 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  animation: wpp-enter 0.6s 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Anillo con pulso — posición absoluta detrás del botón */
+.wpp-fab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #25D366;
+  z-index: -1;
+  animation: wpp-pulse 2.4s ease-out infinite;
+}
+
+.wpp-fab:hover {
+  transform: scale(1.08) rotate(-3deg);
+  box-shadow: 0 14px 32px rgba(37, 211, 102, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wpp-fab svg { display: block; }
+
+/* Tooltip "Cotizar" que aparece al hover en desktop */
+.wpp-fab__label {
+  position: absolute;
+  right: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(8px);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.wpp-fab:hover .wpp-fab__label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@keyframes wpp-enter {
+  from { opacity: 0; transform: translateY(24px) scale(0.7); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes wpp-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .wpp-fab { bottom: 18px; right: 18px; width: 56px; height: 56px; }
+  .wpp-fab__label { display: none; }
+}
+
+/* ---------------------------------------------------
+   SCROLL REVEAL — estado inicial
+   --------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Respeta prefs de usuarios con motion reducido */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav__brand">
+    Viands Sur <span>est. 2014</span>
+  </a>
+  <div class="nav__links">
+    <a href="#propuesta">Propuesta</a>
+    <a href="#planes">Servicio</a>
+    <a href="#proceso">Proceso</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="#contacto" class="nav__cta">Cotizar</a>
+</nav>
+
+<!-- ─────────────── HERO ─────────────── -->
+<section class="hero">
+  <div class="hero__meta">
+    <span>Buenos Aires · Argentina</span>
+    <span>Catering Corporativo · Vol. 11</span>
+    <span id="current-date">—</span>
+  </div>
+
+  <div class="hero__headline">
+    <h1 class="display">
+      Comer bien<br>
+      en la oficina<br>
+      no es un <span class="highlight">beneficio.</span><br>
+      Es una decisión.
+    </h1>
+  </div>
+
+  <div class="hero__bottom">
+    <div class="hero__manifesto">
+      <p class="lede">El almuerzo de la oficina, resuelto. Todos los días.</p>
+      <p>Cocina propia en CABA y GBA. Tres opciones por día. Entrega puntual.</p>
+    </div>
+    <div class="hero__actions">
+      <a href="#contacto" class="btn-primary">
+        Pedir cotización
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </a>
+      <a href="#planes" class="btn-ghost">
+        Ver opciones
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M1 6h10M6 1l5 5-5 5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── TICKER ─────────────── -->
+<section class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <span class="ticker__item">Cocina propia</span>
+    <span class="ticker__item">3 opciones por día</span>
+    <span class="ticker__item">Entrega diaria</span>
+    <span class="ticker__item">Menú rotativo 4 semanas</span>
+    <span class="ticker__item">Habilitación SENASA</span>
+    <span class="ticker__item">+10 años</span>
+    <span class="ticker__item">40 empresas activas</span>
+    <span class="ticker__item">Opciones veggie · sin TACC</span>
+    <!-- Duplicado para loop infinito -->
+    <span class="ticker__item">Cocina propia</span>
+    <span class="ticker__item">3 opciones por día</span>
+    <span class="ticker__item">Entrega diaria</span>
+    <span class="ticker__item">Menú rotativo 4 semanas</span>
+    <span class="ticker__item">Habilitación SENASA</span>
+    <span class="ticker__item">+10 años</span>
+    <span class="ticker__item">40 empresas activas</span>
+    <span class="ticker__item">Opciones veggie · sin TACC</span>
+  </div>
+</section>
+
+<!-- ─────────────── 01 PROPUESTA ─────────────── -->
+<section class="section propuesta" id="propuesta">
+  <div class="section__header reveal">
+    <div class="section__number">01 — Propuesta</div>
+    <div>
+      <h2 class="display section__title">Por qué a tu equipo le va a funcionar.</h2>
+    </div>
+  </div>
+
+  <div class="propuesta__grid">
+    <div class="pillar reveal">
+      <span class="label">Cocina</span>
+      <div class="pillar__num">I</div>
+      <h3>Producción propia, no tercerizada.</h3>
+      <p>Cocinamos cada día en planta propia. Sin intermediarios. Sin cadena de frío.</p>
+    </div>
+
+    <div class="pillar reveal">
+      <span class="label">Operación</span>
+      <div class="pillar__num">II</div>
+      <h3>RR.HH. se olvida del tema.</h3>
+      <p>Un solo contacto. Un reporte mensual. Nosotros manejamos el resto.</p>
+    </div>
+
+    <div class="pillar reveal">
+      <span class="label">Menú</span>
+      <div class="pillar__num">III</div>
+      <h3>Rota. No se repite en 4 semanas.</h3>
+      <p>Ciclo mensual con variedad real. Siempre veggie, sin TACC y low-carb. La gente deja de quejarse del almuerzo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 02 PLANES ─────────────── -->
+<section class="section planes" id="planes">
+  <div class="section__header reveal">
+    <div class="section__number">02 — El servicio</div>
+    <div>
+      <h2 class="display section__title">Cada día, tres opciones. Todas cocinadas esa mañana.</h2>
+    </div>
+  </div>
+
+  <div class="planes__list">
+    <article class="plan reveal">
+      <div class="plan__letter">A</div>
+      <div>
+        <h3 class="plan__name">Plato principal</h3>
+        <span class="plan__tag">Caliente · rotativo</span>
+      </div>
+      <div class="plan__details">
+        <p class="plan__desc">Un plato caliente distinto cada día. Carnes, pastas, guisos, pescados.</p>
+        <ul class="plan__features">
+          <li>Caliente</li>
+          <li>Porción individual</li>
+          <li>Cambia cada día</li>
+          <li>Rota cada 4 semanas</li>
+        </ul>
+      </div>
+      <div class="plan__arrow" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 15L15 1M15 1H4M15 1V12" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+    </article>
+
+    <article class="plan reveal">
+      <div class="plan__letter">B</div>
+      <div>
+        <h3 class="plan__name">Ensalada</h3>
+        <span class="plan__tag">Fresca · del día</span>
+      </div>
+      <div class="plan__details">
+        <p class="plan__desc">Para los que al mediodía buscan algo más liviano. Base de hojas, proteína del día, vegetales frescos.</p>
+        <ul class="plan__features">
+          <li>Fresca del día</li>
+          <li>Proteína incluida</li>
+          <li>Opción veggie</li>
+          <li>Sin TACC disponible</li>
+        </ul>
+      </div>
+      <div class="plan__arrow" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 15L15 1M15 1H4M15 1V12" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+    </article>
+
+    <article class="plan reveal">
+      <div class="plan__letter">C</div>
+      <div>
+        <h3 class="plan__name">Dieta</h3>
+        <span class="plan__tag">Calórico · balanceado</span>
+      </div>
+      <div class="plan__details">
+        <p class="plan__desc">Plan calórico controlado y balanceado. Para los que están cuidando la alimentación.</p>
+        <ul class="plan__features">
+          <li>Calorías controladas</li>
+          <li>Balance nutricional</li>
+          <li>Porción ajustada</li>
+          <li>Adaptable</li>
+        </ul>
+      </div>
+      <div class="plan__arrow" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 15L15 1M15 1H4M15 1V12" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ─────────────── 03 PROCESO ─────────────── -->
+<section class="section proceso" id="proceso">
+  <div class="section__header reveal">
+    <div class="section__number">03 — Cómo empezamos</div>
+    <div>
+      <h2 class="display section__title">Probás antes de contratar.</h2>
+    </div>
+  </div>
+
+  <div class="proceso__list">
+    <div class="step reveal">
+      <div class="step__num"><em>01</em></div>
+      <div class="step__content">
+        <h4>Te mandamos muestras</h4>
+        <p>Una semana de almuerzos con las tres opciones, para que tu equipo pruebe en la oficina.</p>
+      </div>
+      <div class="step__duration">Gratis</div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step__num"><em>02</em></div>
+      <div class="step__content">
+        <h4>Decidís</h4>
+        <p>Si les gustó, arrancamos. Si no, listo.</p>
+      </div>
+      <div class="step__duration">Sin compromiso</div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step__num"><em>03</em></div>
+      <div class="step__content">
+        <h4>Servicio diario</h4>
+        <p>Contrato mensual. Cancelás cuando quieras.</p>
+      </div>
+      <div class="step__duration">Sin permanencia</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 04 CONFIANZA ─────────────── -->
+<section class="section confianza">
+  <div class="section__header reveal">
+    <div class="section__number">04 — Nos eligen</div>
+    <div>
+      <h2 class="display section__title">Los números que importan.</h2>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat reveal">
+      <div class="stat__num">40<span class="unit">+</span></div>
+      <div class="stat__label">Empresas activas en CABA y GBA</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat__num">1.000<span class="unit">+</span></div>
+      <div class="stat__label">Viandas entregadas por día</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat__num">96<span class="unit">%</span></div>
+      <div class="stat__label">Retención de clientes a los 12 meses</div>
+    </div>
+    <div class="stat reveal">
+      <div class="stat__num">0</div>
+      <div class="stat__label">Observaciones de SENASA en 10 años</div>
+    </div>
+  </div>
+
+  <figure class="quote reveal">
+    <div></div>
+    <div>
+      <blockquote class="quote__text">Cambiamos tres proveedores en cinco años. Con Viands Sur ya llevamos cuatro, y nunca más volví a recibir un mail de quejas del almuerzo.</blockquote>
+      <div class="quote__attr">
+        <strong>Laura Fernández</strong>
+        <span>Gerenta de RR.HH. · Fintech, 120 empleados</span>
+      </div>
+    </div>
+  </figure>
+</section>
+
+<!-- ─────────────── 05 FAQ ─────────────── -->
+<section class="section faq" id="faq">
+  <div class="section__header reveal">
+    <div class="section__number">05 — Preguntas frecuentes</div>
+    <div>
+      <h2 class="display section__title">Lo que todos preguntan en la primera llamada.</h2>
+    </div>
+  </div>
+
+  <div class="faq__list">
+    <div class="faq__item">
+      <button class="faq__q">
+        ¿Qué pasa con dietas especiales (vegetariana, celíaca, alergias)?
+        <span class="faq__toggle"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </button>
+      <div class="faq__a"><div class="faq__a-inner">La opción B (ensalada) incluye variante veggie y sin TACC a pedido. Alergias específicas se coordinan al alta del empleado y se marcan en la vianda individual.</div></div>
+    </div>
+    <div class="faq__item">
+      <button class="faq__q">
+        ¿Cómo se ajustan los precios por inflación?
+        <span class="faq__toggle"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </button>
+      <div class="faq__a"><div class="faq__a-inner">Precio fijo por 60 días, ajuste trimestral por INDEC. Todo en el contrato, sin llamadas sorpresa.</div></div>
+    </div>
+    <div class="faq__item">
+      <button class="faq__q">
+        ¿Facturan A con IVA discriminado?
+        <span class="faq__toggle"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </button>
+      <div class="faq__a"><div class="faq__a-inner">Sí. Factura A mensual con IVA al 21%.</div></div>
+    </div>
+    <div class="faq__item">
+      <button class="faq__q">
+        ¿Hay permanencia o punitorios por cancelar?
+        <span class="faq__toggle"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </button>
+      <div class="faq__a"><div class="faq__a-inner">Nada de eso. Contrato mensual, cancelás con 30 días de aviso.</div></div>
+    </div>
+    <div class="faq__item">
+      <button class="faq__q">
+        ¿Entregan en zona norte / zona oeste / CABA?
+        <span class="faq__toggle"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5"/></svg></span>
+      </button>
+      <div class="faq__a"><div class="faq__a-inner">CABA, zona sur hasta La Plata, zona norte hasta Pilar, zona oeste hasta Morón. Más lejos, caso por caso.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 06 CONTACTO ─────────────── -->
+<section class="section contacto" id="contacto">
+  <div class="section__header reveal">
+    <div class="section__number">06 — Cotización</div>
+    <div>
+      <h2 class="display section__title">Respondemos en menos de 24 hs hábiles.</h2>
+    </div>
+  </div>
+
+  <div class="contacto__grid">
+    <div class="contacto__intro reveal">
+      <h2 class="display">Charlemos.</h2>
+      <p>Completá el formulario o escribinos directo. Respondemos en el día.</p>
+      <div class="contact-card">
+        <span>Directo</span>
+        <a href="mailto:cepreco.a@gmail.com">cepreco.a@gmail.com</a>
+        <a href="https://wa.me/5491133072434?text=Hola%20Viands%20Sur,%20quiero%20cotizar">WhatsApp +54 9 11 3307-2434</a>
+      </div>
+    </div>
+
+    <form class="form reveal" id="cotizar-form" novalidate>
+      <div class="form__row">
+        <div class="form__group">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa" required placeholder="Razón social o nombre">
+        </div>
+        <div class="form__group">
+          <label for="nombre">Tu nombre</label>
+          <input type="text" id="nombre" name="nombre" required placeholder="Nombre y apellido">
+        </div>
+      </div>
+
+      <div class="form__row">
+        <div class="form__group">
+          <label for="email">Email corporativo</label>
+          <input type="email" id="email" name="email" required placeholder="tuemail@empresa.com">
+        </div>
+        <div class="form__group">
+          <label for="tel">Teléfono</label>
+          <input type="tel" id="tel" name="tel" placeholder="Opcional">
+        </div>
+      </div>
+
+      <div class="form__group">
+        <label for="empleados">Cantidad de empleados aproximada</label>
+        <select id="empleados" name="empleados" required>
+          <option value="">Elegí un rango</option>
+          <option>Menos de 20</option>
+          <option>20 – 50</option>
+          <option>50 – 100</option>
+          <option>100 – 200</option>
+          <option>Más de 200</option>
+        </select>
+      </div>
+
+      <div class="form__group">
+        <label for="mensaje">Contame brevemente tu situación actual</label>
+        <textarea id="mensaje" name="mensaje" rows="3" placeholder="¿Ya tenés proveedor? ¿Qué querés cambiar?"></textarea>
+      </div>
+
+      <button type="submit" class="form__submit">
+        Enviar cotización
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M1 8h14m0 0L8 1m7 7l-7 7" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+      <p class="form__note">Respondemos en menos de 24 horas hábiles. Tu información no se comparte.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER ─────────────── -->
+<footer class="footer">
+  <div class="footer__hero">
+    <span>Viands</span> Sur<em>.</em>
+  </div>
+
+  <div class="footer__grid">
+    <div class="footer__col footer__brand">
+      <h5>Viands Sur</h5>
+      <p>Catering corporativo con cocina propia. Desde 2014 alimentando oficinas en CABA y GBA. Una división de Cepreco S.R.L.</p>
+    </div>
+    <div class="footer__col">
+      <h5>Navegar</h5>
+      <ul>
+        <li><a href="#propuesta">Propuesta</a></li>
+        <li><a href="#planes">Planes</a></li>
+        <li><a href="#proceso">Proceso</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h5>Contacto</h5>
+      <ul>
+        <li><a href="mailto:cepreco.a@gmail.com">Email</a></li>
+        <li><a href="https://wa.me/5491133072434">WhatsApp</a></li>
+        <li><a href="tel:+5491133072434">Teléfono</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <span>© 2026 Viands Sur · Cepreco S.R.L.</span>
+    <span>Hecho en Buenos Aires</span>
+  </div>
+</footer>
+
+<!-- ─────────────── WHATSAPP FLOATING BUTTON ─────────────── -->
+<a href="https://wa.me/5491133072434?text=Hola%20Viands%20Sur,%20quiero%20cotizar%20el%20servicio%20de%20almuerzo"
+   class="wpp-fab"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Chatear por WhatsApp">
+  <span class="wpp-fab__label">Cotizá por WhatsApp</span>
+  <svg viewBox="0 0 32 32" width="30" height="30" fill="currentColor" aria-hidden="true">
+    <path d="M16.003 3C9.373 3 4 8.373 4 15.003c0 2.29.66 4.426 1.8 6.233L4 28l7.003-1.836A11.94 11.94 0 0 0 16.003 27C22.633 27 28 21.627 28 14.997S22.633 3 16.003 3zm0 21.66a9.6 9.6 0 0 1-4.974-1.462l-.356-.226-4.152 1.09 1.109-4.047-.233-.364a9.59 9.59 0 0 1-1.476-5.228c0-5.304 4.324-9.63 9.636-9.63 2.574 0 4.992 1.002 6.81 2.82 1.817 1.818 2.82 4.236 2.82 6.81-.006 5.306-4.33 9.657-9.643 9.657zm5.284-7.207c-.289-.145-1.714-.847-1.98-.942-.266-.097-.46-.145-.654.145-.193.289-.748.942-.918 1.135-.168.193-.338.218-.627.073-.289-.145-1.221-.45-2.326-1.435-.86-.767-1.44-1.716-1.61-2.005-.168-.289-.018-.445.127-.59.13-.13.289-.338.434-.508.145-.168.193-.289.289-.482.097-.193.048-.362-.024-.507-.073-.145-.654-1.572-.895-2.15-.236-.566-.476-.489-.654-.498l-.555-.01c-.193 0-.507.073-.773.362s-1.013.99-1.013 2.418c0 1.427 1.038 2.805 1.183 3 .145.193 2.043 3.12 4.944 4.375.69.298 1.23.475 1.65.608.694.22 1.325.189 1.825.115.557-.083 1.714-.7 1.954-1.376.24-.677.24-1.256.169-1.377-.072-.12-.265-.193-.554-.338z"/>
+  </svg>
+</a>
+
+<!-- ─────────────── JS ─────────────── -->
+<script>
+/* ------------------------------------------------------------------
+   Fecha actual en hero (tipo publicación)
+   ------------------------------------------------------------------ */
+const dateEl = document.getElementById("current-date");
+const now = new Date();
+const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+dateEl.textContent = `${String(now.getDate()).padStart(2,"0")} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+/* ------------------------------------------------------------------
+   Nav con borde al scrollear (no shadow)
+   ------------------------------------------------------------------ */
+const nav = document.getElementById("nav");
+window.addEventListener("scroll", () => {
+  nav.classList.toggle("scrolled", window.scrollY > 20);
+});
+
+/* ------------------------------------------------------------------
+   Scroll reveal — IntersectionObserver, simple y barato
+   ------------------------------------------------------------------ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: "0px 0px -80px 0px" });
+
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+/* ------------------------------------------------------------------
+   FAQ accordion — toggle abierto, un solo item por vez
+   ------------------------------------------------------------------ */
+document.querySelectorAll(".faq__q").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const item = btn.parentElement;
+    const wasOpen = item.classList.contains("open");
+    document.querySelectorAll(".faq__item.open").forEach(i => i.classList.remove("open"));
+    if (!wasOpen) item.classList.add("open");
+  });
+});
+
+/* ------------------------------------------------------------------
+   Form submit — redirige a WhatsApp con mensaje prearmado
+   (solución simple sin backend; cuando tengas Firebase, se cambia)
+   ------------------------------------------------------------------ */
+document.getElementById("cotizar-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const txt = encodeURIComponent(
+    `Hola Viands Sur, quiero cotizar:\n\n` +
+    `Empresa: ${f.empresa.value}\n` +
+    `Contacto: ${f.nombre.value}\n` +
+    `Email: ${f.email.value}\n` +
+    `Tel: ${f.tel.value || "—"}\n` +
+    `Empleados: ${f.empleados.value}\n\n` +
+    `${f.mensaje.value}`
+  );
+  window.open(`https://wa.me/5491133072434?text=${txt}`, "_blank");
+});
+</script>
+
+</body>
+</html>

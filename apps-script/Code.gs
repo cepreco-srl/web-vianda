@@ -4,7 +4,8 @@
  * Se pega en: Google Sheet → Extensiones → Apps Script.
  * Hojas que usa (se crean solas con "Viands Sur → Preparar planilla"):
  *   Config    → fecha del lunes de la semana, hora de cierre, email
- *               (cada día cierra el día anterior a esa hora)
+ *               (cada día cierra el día hábil anterior a esa hora;
+ *                el lunes cierra el viernes)
  *   Menu      → una fila por día, una columna por opción (A/B/C)
  *   Empresas  → código (va en el link) y nombre de cada empresa
  *   Pedidos   → una fila por persona por semana (se completa sola)
@@ -111,13 +112,15 @@ function etiquetaSemana_(lunes) {
     : 'Semana del ' + a.getUTCDate() + ' de ' + MESES[a.getUTCMonth()] + ' al ' + b.getUTCDate() + ' de ' + MESES[b.getUTCMonth()];
 }
 
-/** Fecha y cierre de cada día: cierra el día anterior a la hora de cierre (hora Argentina, UTC-3) */
+/** Fecha y cierre de cada día: cierra el día hábil anterior a la hora de cierre (hora Argentina, UTC-3).
+ *  El lunes cierra el viernes anterior. */
 function calendario_(cfg) {
   const ahora = new Date();
   return DIAS.map((dia, i) => {
     if (!cfg.lunes) return { fecha: null, cierre: null, abierto: true };
     const d = sumarDias_(cfg.lunes, i);
-    const cierre = new Date(d.getTime() - 24 * 3600000 + (cfg.hora + 3) * 3600000);
+    const diasAntes = i === 0 ? 3 : 1;
+    const cierre = new Date(d.getTime() - diasAntes * 24 * 3600000 + (cfg.hora + 3) * 3600000);
     return { fecha: d.toISOString().slice(0, 10), cierre: cierre.toISOString(), abierto: ahora < cierre };
   });
 }

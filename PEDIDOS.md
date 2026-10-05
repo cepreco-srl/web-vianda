@@ -39,7 +39,7 @@ Usá un código no obvio si querés que nadie de afuera adivine el link (ej: `ac
 
 En la hoja **Config**:
 - **Lunes de la semana**: la fecha del lunes (ej: `19/10/2026`). Con eso se arma solo el texto "Semana del 19 al 23 de octubre" y se separan los pedidos de cada semana.
-- **Hora de cierre** (normalmente `18`): cada día se puede pedir hasta **el día anterior a esa hora**. Ej: el martes cierra el lunes a las 18 h, el lunes cierra el domingo a las 18 h. Los días cerrados aparecen grisados y no se pueden modificar.
+- **Hora de cierre** (normalmente `18`): cada día se puede pedir hasta **el día hábil anterior a esa hora**. Ej: el martes cierra el lunes a las 18 h, y el lunes cierra el viernes anterior a las 18 h. Los días cerrados aparecen grisados y no se pueden modificar.
 
 En la hoja **Menu**: reemplazar los platos. Si un día no hay servicio (feriado), dejá la fila vacía. Si un día no hay ensalada, dejá esa celda vacía.
 

@@ -169,30 +169,6 @@ main {
   max-width: 40ch;
 }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 100px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink-soft);
-}
-
-.pill::before {
-  content: "";
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #3D8B4F;
-}
-
-.pill--closed::before { background: var(--orange); }
-
 /* ---------------------------------------------------
    NOMBRE
    --------------------------------------------------- */
@@ -253,6 +229,20 @@ main {
 }
 
 .day__status.done { color: var(--orange); }
+
+.day__date {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.day--closed .opt { cursor: not-allowed; }
+.day--closed .opt__card { opacity: 0.45; }
+.day--closed .opt:hover .opt__card { border-color: var(--line); }
+.day--closed .opt input:checked + .opt__card { opacity: 1; }
+.day--closed .skip { display: none; }
 
 .day__options {
   display: grid;
@@ -488,10 +478,9 @@ footer {
     <header class="head">
       <div class="head__meta">
         <span class="label" id="h-semana"></span>
-        <span class="pill" id="h-cierre"></span>
       </div>
       <h1>El menú de <em>la semana.</em></h1>
-      <p class="head__lede">Elegí una opción por día. Si un día no comés, marcá “No pido”.</p>
+      <p class="head__lede">Elegí una opción por día. Si un día no comés, marcá “No pido”. Cada día se puede pedir hasta el día anterior a las <span id="h-hora">18</span> h.</p>
     </header>
 
     <div class="field">
@@ -512,7 +501,7 @@ footer {
         Enviar mi pedido
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1 8h13m0 0L9 3m5 5l-5 5" stroke="currentColor" stroke-width="1.5"/></svg>
       </button>
-      <p class="note">Si te equivocás, volvé a cargarlo con el mismo nombre antes del cierre y se reemplaza.</p>
+      <p class="note">Si te equivocás, volvé a cargarlo con el mismo nombre y se reemplaza (los días ya cerrados no cambian).</p>
     </div>
   </form>
 
@@ -541,8 +530,7 @@ footer {
     ok: true,
     empresa: 'Empresa Demo',
     semana: 'Semana del 12 al 16 de octubre',
-    cierre: new Date(Date.now() + 3 * 86400000).toISOString(),
-    abierto: true,
+    horaCierre: 18,
     opciones: [
       { key: 'A', label: 'Clásico' },
       { key: 'B', label: 'Ensalada' },
@@ -571,11 +559,21 @@ footer {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+
+  function fmtFecha(ymd) {
+    const p = ymd.split('-');
+    return p[2] + '/' + p[1];
+  }
+
   function fmtCierre(iso) {
     const d = new Date(iso);
-    return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'numeric' }) +
-      ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' h';
+    const ar = new Date(d.getTime() - 3 * 3600000); // hora Argentina
+    return DIAS_CORTOS[ar.getUTCDay()] + ' ' + String(ar.getUTCHours()).padStart(2, '0') + ':' + String(ar.getUTCMinutes()).padStart(2, '0') + ' h';
   }
+
+  const abierto = (d) => d.abierto !== false;
+  const conMenu = (d) => menu.opciones.some((o) => d.platos[o.key]);
 
   async function load() {
     if (DEMO) {
@@ -594,25 +592,20 @@ footer {
     $('nav-empresa').textContent = m.empresa;
     $('h-semana').textContent = m.semana;
 
-    const pill = $('h-cierre');
-    if (m.abierto) {
-      pill.textContent = m.cierre ? 'Abierto hasta el ' + fmtCierre(m.cierre) : 'Pedidos abiertos';
-    } else {
-      pill.textContent = 'Pedidos cerrados';
-      pill.classList.add('pill--closed');
-    }
+    if (m.horaCierre != null) $('h-hora').textContent = m.horaCierre;
 
     $('days').innerHTML = m.dias.map((d, i) => {
       const keys = m.opciones.filter((o) => d.platos[o.key]);
+      const fecha = d.fecha ? `<p class="day__date">${fmtFecha(d.fecha)}</p>` : '';
       if (!keys.length) {
         return `<section class="day day--off">
-          <div class="day__header"><h2 class="day__name">${esc(d.dia)}</h2></div>
+          <div class="day__header"><div><h2 class="day__name">${esc(d.dia)}</h2>${fecha}</div></div>
           <div class="day__options">Sin servicio este día.</div>
         </section>`;
       }
       const opts = keys.map((o) => `
         <label class="opt">
-          <input type="radio" name="d${i}" value="${esc(o.key)}">
+          <input type="radio" name="d${i}" value="${esc(o.key)}"${abierto(d) ? '' : ' disabled'}>
           <span class="opt__card">
             <span class="opt__top">
               <span class="opt__letter">${esc(o.key)}</span>
@@ -621,14 +614,17 @@ footer {
             <span class="opt__plato">${esc(d.platos[o.key])}</span>
           </span>
         </label>`).join('');
-      return `<section class="day" data-day="${i}">
+      const status = abierto(d)
+        ? (d.cierre ? 'Hasta ' + fmtCierre(d.cierre) : 'Sin elegir')
+        : 'Cerrado';
+      return `<section class="day${abierto(d) ? '' : ' day--closed'}" data-day="${i}">
         <div class="day__header">
-          <h2 class="day__name">${esc(d.dia)}</h2>
-          <p class="day__status" id="st${i}">Sin elegir</p>
+          <div><h2 class="day__name">${esc(d.dia)}</h2>${fecha}</div>
+          <p class="day__status" id="st${i}">${status}</p>
         </div>
         <div class="day__options" role="radiogroup" aria-label="${esc(d.dia)}">
           ${opts}
-          <label class="skip"><input type="radio" name="d${i}" value=""> No pido este día</label>
+          <label class="skip"><input type="radio" name="d${i}" value=""${abierto(d) ? '' : ' disabled'}> No pido este día</label>
         </div>
       </section>`;
     }).join('');
@@ -644,7 +640,7 @@ footer {
 
     try { $('nombre').value = localStorage.getItem('vs_nombre') || ''; } catch (_) {}
 
-    if (!m.abierto) {
+    if (!m.dias.some((d) => abierto(d) && conMenu(d))) {
       $('s-form').querySelectorAll('input, textarea, button').forEach((el) => { el.disabled = true; });
       $('submit-btn').textContent = 'Los pedidos de esta semana ya cerraron';
     }
@@ -656,7 +652,7 @@ footer {
     const elecciones = {};
     const faltan = [];
     menu.dias.forEach((d, i) => {
-      if (!menu.opciones.some((o) => d.platos[o.key])) return;
+      if (!conMenu(d) || !abierto(d)) return;
       const sel = document.querySelector(`input[name="d${i}"]:checked`);
       if (!sel) faltan.push(d.dia);
       else elecciones[d.dia] = sel.value;
@@ -686,10 +682,6 @@ footer {
       formError('Te falta elegir: ' + faltan.join(', ') + '. Si no comés ese día, marcá “No pido”.');
       return;
     }
-    if (!Object.values(elecciones).some(Boolean)) {
-      formError('Elegí al menos un día.');
-      return;
-    }
 
     const btn = $('submit-btn');
     btn.disabled = true;
@@ -706,7 +698,7 @@ footer {
       if (!r.ok) throw new Error(r.error || 'No se pudo guardar el pedido.');
 
       try { localStorage.setItem('vs_nombre', nombre); } catch (_) {}
-      done(nombre, elecciones, r.actualizado);
+      done(nombre, r.pedido || demoPedido(elecciones), r.actualizado);
     } catch (err) {
       formError(err.message || 'No se pudo enviar. Revisá tu conexión e intentá de nuevo.');
     } finally {
@@ -715,14 +707,25 @@ footer {
     }
   });
 
-  function done(nombre, elecciones, actualizado) {
+  function demoPedido(elecciones) {
+    const p = {};
+    menu.dias.forEach((d) => {
+      const k = elecciones[d.dia];
+      p[d.dia] = k ? k + ' · ' + d.platos[k] : '—';
+    });
+    return p;
+  }
+
+  function done(nombre, pedido, actualizado) {
     $('done-name').textContent = nombre.split(' ')[0];
     $('done-msg').textContent = actualizado
       ? 'Actualizamos tu pedido. Este es el que vale:'
       : 'Tu pedido quedó registrado para la ' + menu.semana.toLowerCase() + ':';
     $('recap').innerHTML = menu.dias.map((d) => {
-      const k = elecciones[d.dia];
-      const txt = k ? k + ' · ' + d.platos[k] : (d.dia in elecciones ? 'No pide' : 'Sin servicio');
+      let txt = pedido[d.dia] || '—';
+      if (!conMenu(d)) txt = 'Sin servicio';
+      else if (txt === '—') txt = 'No pide';
+      else txt = txt.replace(/^([A-Z]) · [^—]+ — /, '$1 · ');
       return `<li><span class="label">${esc(d.dia)}</span><span>${esc(txt)}</span></li>`;
     }).join('');
     show('s-done');

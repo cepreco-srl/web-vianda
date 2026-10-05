@@ -38,8 +38,8 @@ Usá un código no obvio si querés que nadie de afuera adivine el link (ej: `ac
 ## Cada semana
 
 En la hoja **Config**:
-- **Semana**: cambiar el texto (ej: `Semana del 19 al 23 de octubre`). Esto es lo que separa una semana de otra — si no lo cambiás, los pedidos nuevos pisan los de la semana anterior.
-- **Cierre**: fecha y hora límite. Después de eso la página no deja pedir.
+- **Lunes de la semana**: la fecha del lunes (ej: `19/10/2026`). Con eso se arma solo el texto "Semana del 19 al 23 de octubre" y se separan los pedidos de cada semana.
+- **Hora de cierre** (normalmente `18`): cada día se puede pedir hasta **el día anterior a esa hora**. Ej: el martes cierra el lunes a las 18 h, el lunes cierra el domingo a las 18 h. Los días cerrados aparecen grisados y no se pueden modificar.
 
 En la hoja **Menu**: reemplazar los platos. Si un día no hay servicio (feriado), dejá la fila vacía. Si un día no hay ensalada, dejá esa celda vacía.
 
@@ -49,7 +49,7 @@ En la hoja **Menu**: reemplazar los platos. Si un día no hay servicio (feriado)
 - **Pedidos**: el detalle persona por persona. Se puede filtrar por Semana / Empresa.
 - Menú **Viands Sur → Enviarme el resumen por email** (aparece al reabrir la planilla). Para que llegue solo al cierre: en Apps Script → Activadores → `enviarResumen`, basado en tiempo.
 
-Si un empleado vuelve a pedir con el mismo nombre antes del cierre, se reemplaza su pedido (no se duplica).
+Si un empleado vuelve a pedir con el mismo nombre, se reemplaza su pedido (no se duplica); los días ya cerrados quedan como estaban.
 
 ## Probar sin configurar nada
 

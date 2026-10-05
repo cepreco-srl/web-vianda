@@ -3,7 +3,8 @@
  * ------------------------------------------------------------
  * Se pega en: Google Sheet → Extensiones → Apps Script.
  * Hojas que usa (se crean solas con "Viands Sur → Preparar planilla"):
- *   Config    → semana actual, fecha de cierre, email para resúmenes
+ *   Config    → fecha del lunes de la semana, hora de cierre, email
+ *               (cada día cierra el día anterior a esa hora)
  *   Menu      → una fila por día, una columna por opción (A/B/C)
  *   Empresas  → código (va en el link) y nombre de cada empresa
  *   Pedidos   → una fila por persona por semana (se completa sola)
@@ -27,11 +28,24 @@ function onOpen() {
 function setup() {
   const ss = SpreadsheetApp.getActive();
 
-  hoja_(ss, 'Config', [
-    ['Semana', 'Semana del 12 al 16 de octubre'],
-    ['Cierre', new Date(2026, 9, 9, 12, 0)],
+  const filasConfig = [
+    ['Lunes de la semana', proximoLunes_()],
+    ['Hora de cierre', 18],
     ['Email resumen', Session.getActiveUser().getEmail()],
-  ]);
+  ];
+  hoja_(ss, 'Config', filasConfig);
+
+  // Planillas creadas con la versión anterior (Semana / Cierre) → pasar al formato nuevo
+  const cfgSh = ss.getSheetByName('Config');
+  const claves = cfgSh.getRange('A:A').getValues().map(r => String(r[0]).trim().toLowerCase());
+  if (claves.indexOf('lunes de la semana') < 0) {
+    const email = config_().email || filasConfig[2][1];
+    filasConfig[2][1] = email;
+    cfgSh.clear();
+    cfgSh.getRange(1, 1, filasConfig.length, 2).setValues(filasConfig);
+    cfgSh.getRange('A:A').setFontWeight('bold');
+  }
+  cfgSh.getRange('B1').setNumberFormat('dd/mm/yyyy');
 
   hoja_(ss, 'Menu', [
     ['Día', 'A · Clásico', 'B · Ensalada', 'C · Liviano'],
@@ -66,14 +80,53 @@ function hoja_(ss, nombre, filas) {
 // ─────────────── LECTURA DE CONFIG ───────────────
 
 function config_() {
-  const vals = SpreadsheetApp.getActive().getSheetByName('Config').getDataRange().getValues();
+  const ss = SpreadsheetApp.getActive();
+  const vals = ss.getSheetByName('Config').getDataRange().getValues();
   const c = {};
   vals.forEach(r => { c[String(r[0]).trim().toLowerCase()] = r[1]; });
+  const lunes = c['lunes de la semana'] instanceof Date
+    ? Utilities.formatDate(c['lunes de la semana'], ss.getSpreadsheetTimeZone(), 'yyyy-MM-dd')
+    : null;
+  const hora = Number(c['hora de cierre']);
   return {
-    semana: String(c['semana'] || '').trim(),
-    cierre: c['cierre'] instanceof Date ? c['cierre'] : null,
+    lunes,                                          // 'yyyy-MM-dd'
+    hora: hora >= 0 && hora < 24 ? hora : 18,
+    semana: lunes ? etiquetaSemana_(lunes) : String(c['semana'] || '').trim(),
     email: String(c['email resumen'] || '').trim(),
   };
+}
+
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/** 'yyyy-MM-dd' + n días → Date en UTC (solo se usan año/mes/día) */
+function sumarDias_(ymd, n) {
+  const p = ymd.split('-').map(Number);
+  return new Date(Date.UTC(p[0], p[1] - 1, p[2] + n));
+}
+
+function etiquetaSemana_(lunes) {
+  const a = sumarDias_(lunes, 0), b = sumarDias_(lunes, 4);
+  return a.getUTCMonth() === b.getUTCMonth()
+    ? 'Semana del ' + a.getUTCDate() + ' al ' + b.getUTCDate() + ' de ' + MESES[b.getUTCMonth()]
+    : 'Semana del ' + a.getUTCDate() + ' de ' + MESES[a.getUTCMonth()] + ' al ' + b.getUTCDate() + ' de ' + MESES[b.getUTCMonth()];
+}
+
+/** Fecha y cierre de cada día: cierra el día anterior a la hora de cierre (hora Argentina, UTC-3) */
+function calendario_(cfg) {
+  const ahora = new Date();
+  return DIAS.map((dia, i) => {
+    if (!cfg.lunes) return { fecha: null, cierre: null, abierto: true };
+    const d = sumarDias_(cfg.lunes, i);
+    const cierre = new Date(d.getTime() - 24 * 3600000 + (cfg.hora + 3) * 3600000);
+    return { fecha: d.toISOString().slice(0, 10), cierre: cierre.toISOString(), abierto: ahora < cierre };
+  });
+}
+
+function proximoLunes_() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
+  return d;
 }
 
 function menu_() {
@@ -113,14 +166,10 @@ function doGet(e) {
   const emp = empresa_(e.parameter.e);
   if (!emp) return json_({ ok: false, error: 'Link inválido. Pedile el link correcto a Viands Sur.' });
   const cfg = config_();
-  const abierto = !cfg.cierre || new Date() < cfg.cierre;
-  return json_(Object.assign({
-    ok: true,
-    empresa: emp.nombre,
-    semana: cfg.semana,
-    cierre: cfg.cierre ? cfg.cierre.toISOString() : null,
-    abierto,
-  }, menu_()));
+  const cal = calendario_(cfg);
+  const menu = menu_();
+  menu.dias.forEach((d, i) => Object.assign(d, cal[i]));
+  return json_(Object.assign({ ok: true, empresa: emp.nombre, semana: cfg.semana, horaCierre: cfg.hora }, menu));
 }
 
 /** POST {e, nombre, elecciones:{Lunes:'A',...}, obs} → guarda/actualiza el pedido */
@@ -132,23 +181,21 @@ function doPost(e) {
   if (!emp) return json_({ ok: false, error: 'Link inválido.' });
 
   const cfg = config_();
-  if (cfg.cierre && new Date() >= cfg.cierre) {
-    return json_({ ok: false, error: 'Los pedidos de esta semana ya cerraron.' });
-  }
+  const cal = calendario_(cfg);
+  if (cal.every(c => !c.abierto)) return json_({ ok: false, error: 'Los pedidos de esta semana ya cerraron.' });
 
   const nombre = String(body.nombre || '').replace(/\s+/g, ' ').trim().slice(0, 80);
   if (nombre.length < 3) return json_({ ok: false, error: 'Escribí tu nombre y apellido.' });
 
   const { opciones, dias } = menu_();
   const elecciones = body.elecciones || {};
-  const fila = DIAS.map((dia, i) => {
+  const elegido = DIAS.map((dia, i) => {
     const k = String(elecciones[dia] || '');
     const plato = dias[i].platos[k];
     if (!plato) return NO_PIDE;
     const op = opciones.find(o => o.key === k);
     return k + ' · ' + (op ? op.label + ' — ' : '') + plato;
   });
-  if (fila.every(v => v === NO_PIDE)) return json_({ ok: false, error: 'Elegí al menos un día.' });
 
   const obs = String(body.obs || '').trim().slice(0, 300);
 
@@ -156,7 +203,6 @@ function doPost(e) {
   lock.waitLock(20000);
   try {
     const sh = SpreadsheetApp.getActive().getSheetByName('Pedidos');
-    const datos = [new Date(), cfg.semana, emp.codigo, emp.nombre, nombre].concat(fila, [obs]);
 
     // Si la misma persona ya pidió esta semana, se pisa su pedido (no se duplica)
     const vals = sh.getDataRange().getValues();
@@ -168,11 +214,21 @@ function doPost(e) {
         break;
       }
     }
+    const previo = filaExistente > 0 ? vals[filaExistente - 1].slice(5, 10) : DIAS.map(() => NO_PIDE);
+
+    // Días ya cerrados: queda lo que había (no se pueden cambiar)
+    const fila = DIAS.map((_, i) => cal[i].abierto ? elegido[i] : String(previo[i] || NO_PIDE));
+    if (fila.every(v => v === NO_PIDE)) return json_({ ok: false, error: 'Elegí al menos un día.' });
+
+    const datos = [new Date(), cfg.semana, emp.codigo, emp.nombre, nombre].concat(fila, [obs]);
     if (filaExistente > 0) sh.getRange(filaExistente, 1, 1, datos.length).setValues([datos]);
     else sh.appendRow(datos);
 
+    const pedido = {};
+    DIAS.forEach((dia, i) => { pedido[dia] = fila[i]; });
+
     armarResumen();
-    return json_({ ok: true, actualizado: filaExistente > 0 });
+    return json_({ ok: true, actualizado: filaExistente > 0, pedido });
   } finally {
     lock.releaseLock();
   }

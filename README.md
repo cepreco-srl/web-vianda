@@ -10,6 +10,10 @@ Sitio estático, un solo archivo. Sin build, sin dependencias.
 - Fuentes: Google Fonts (Fraunces, Instrument Sans, JetBrains Mono)
 - Sin tracking, sin cookies, sin backend
 
+## App de pedidos
+
+`pedidos.html` (→ `/pedidos?e=<código-empresa>`) permite que los empleados de cada empresa cliente elijan su menú semanal. Los pedidos se guardan en un Google Sheet vía Apps Script (`apps-script/Code.gs`). Configuración y uso semanal en [PEDIDOS.md](PEDIDOS.md).
+
 ## Desarrollo local
 
 No hay build. Abrís `index.html` en el navegador y listo.

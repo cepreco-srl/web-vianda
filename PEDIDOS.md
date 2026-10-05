@@ -1,0 +1,56 @@
+# App de pedidos semanales
+
+Página `/pedidos` donde los empleados de cada empresa cliente eligen su almuerzo de lunes a viernes.
+Los pedidos llegan a un **Google Sheet** tuyo, agrupados por empresa. Costo: $0.
+
+```
+Empleado (celular) ──► viands-sur.vercel.app/pedidos?e=acme ──► Google Apps Script ──► Google Sheet
+                                                                                       ├─ Menu      (lo cargás vos)
+                                                                                       ├─ Empresas  (códigos de link)
+                                                                                       ├─ Pedidos   (una fila por persona)
+                                                                                       └─ Resumen   (totales por empresa/día)
+```
+
+## Configuración (una sola vez, ~10 minutos)
+
+1. Crear un Google Sheet nuevo (ej: "Viands Sur — Pedidos").
+2. **Extensiones → Apps Script**. Borrar lo que haya y pegar el contenido de [`apps-script/Code.gs`](apps-script/Code.gs). Guardar.
+3. En el editor de Apps Script, elegir la función `setup` arriba y darle **Ejecutar**. Aceptar los permisos (es tu propia cuenta). Esto crea las hojas con datos de ejemplo.
+4. **Implementar → Nueva implementación** → tipo **Aplicación web**:
+   - Ejecutar como: **Yo**
+   - Quién tiene acceso: **Cualquier usuario**
+   - Copiar la URL que termina en `/exec`.
+5. En `pedidos.html`, pegar esa URL en `const API_URL = '...'` y hacer push a `main` (Vercel deploya solo).
+
+> Si después cambiás `Code.gs`, hay que ir a **Implementar → Administrar implementaciones → Editar → Nueva versión** para que tome los cambios. La URL no cambia.
+
+## Agregar una empresa
+
+En la hoja **Empresas** agregá una fila: `Código | Nombre`, ej: `acme | ACME S.A.`
+El link para mandarles es:
+
+```
+https://viands-sur.vercel.app/pedidos?e=acme
+```
+
+Usá un código no obvio si querés que nadie de afuera adivine el link (ej: `acme-7k2`).
+
+## Cada semana
+
+En la hoja **Config**:
+- **Semana**: cambiar el texto (ej: `Semana del 19 al 23 de octubre`). Esto es lo que separa una semana de otra — si no lo cambiás, los pedidos nuevos pisan los de la semana anterior.
+- **Cierre**: fecha y hora límite. Después de eso la página no deja pedir.
+
+En la hoja **Menu**: reemplazar los platos. Si un día no hay servicio (feriado), dejá la fila vacía. Si un día no hay ensalada, dejá esa celda vacía.
+
+## Ver los pedidos
+
+- **Resumen**: se actualiza solo con cada pedido. Por empresa: cuántas A/B/C por día + observaciones (alergias, etc).
+- **Pedidos**: el detalle persona por persona. Se puede filtrar por Semana / Empresa.
+- Menú **Viands Sur → Enviarme el resumen por email** (aparece al reabrir la planilla). Para que llegue solo al cierre: en Apps Script → Activadores → `enviarResumen`, basado en tiempo.
+
+Si un empleado vuelve a pedir con el mismo nombre antes del cierre, se reemplaza su pedido (no se duplica).
+
+## Probar sin configurar nada
+
+Con `API_URL` vacío la página funciona en **modo demo** (datos de ejemplo, no guarda nada). Abrí `pedidos.html` en el navegador.

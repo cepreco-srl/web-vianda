@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Pedidos — Viands Sur</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script>
+  /* ───────────────────────────────────────────────
+     CONFIG
+     Pegar acá la URL de la implementación de Apps Script
+     (termina en /exec). Vacío = modo demo con datos de ejemplo.
+     ─────────────────────────────────────────────── */
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyfp5jhjs_CiuLg7ay9dAP24zfF6ddPTfZia-9JFcdMWmJ8Lu3_V1BtjaE-R4q9ZlyKPw/exec';
+</script>
+
+<style>
+/* ---------------------------------------------------
+   CORE TOKENS — mismos que index.html
+   --------------------------------------------------- */
+:root {
+  --cream: #F5EFE6;
+  --cream-warm: #EDE5D6;
+  --cream-deep: #E5DAC5;
+  --paper: #FAF6EE;
+
+  --ink: #1C1A17;
+  --ink-soft: #2C2824;
+  --ink-muted: #6B6459;
+  --ink-faded: #A39B8D;
+
+  --orange: #D4501F;
+  --orange-deep: #A63A14;
+  --orange-wash: #E8A880;
+
+  --line: rgba(28, 26, 23, 0.12);
+  --line-strong: rgba(28, 26, 23, 0.24);
+
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Instrument Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --pad-page: clamp(16px, 4vw, 48px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; }
+::selection { background: var(--orange); color: var(--cream); }
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------
+   NAV
+   --------------------------------------------------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 18px var(--pad-page);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245, 239, 230, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav__brand {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 50;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.nav__brand span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------
+   LAYOUT
+   --------------------------------------------------- */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px var(--pad-page) 120px;
+}
+
+.head {
+  border-top: 1px solid var(--ink);
+  padding-top: 20px;
+  margin-bottom: 40px;
+}
+
+.head__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-bottom: 28px;
+}
+
+.head h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 8vw, 88px);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 0;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.head h1 em {
+  color: var(--orange);
+  font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1;
+}
+
+.head__lede {
+  margin-top: 20px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-variation-settings: "opsz" 36, "SOFT" 60;
+  font-size: clamp(19px, 2.2vw, 26px);
+  line-height: 1.35;
+  color: var(--ink-soft);
+  max-width: 40ch;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.pill::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #3D8B4F;
+}
+
+.pill--closed::before { background: var(--orange); }
+
+/* ---------------------------------------------------
+   NOMBRE
+   --------------------------------------------------- */
+.field {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 24px 28px;
+  margin-bottom: 40px;
+}
+
+.field label { display: block; margin-bottom: 6px; }
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  font-size: 20px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.field textarea { font-size: 16px; resize: vertical; min-height: 64px; }
+
+.field input:focus,
+.field textarea:focus { border-bottom-color: var(--orange); }
+
+/* ---------------------------------------------------
+   DÍAS
+   --------------------------------------------------- */
+.day {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 32px;
+  padding: 32px 0;
+  border-top: 1px solid var(--line-strong);
+}
+
+.day:last-of-type { border-bottom: 1px solid var(--line-strong); }
+
+.day__name {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-variation-settings: "opsz" 72, "SOFT" 30;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.day__status {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faded);
+}
+
+.day__status.done { color: var(--orange); }
+
+.day__options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.opt { position: relative; display: block; cursor: pointer; }
+
+.opt input { position: absolute; opacity: 0; pointer-events: none; }
+
+.opt__card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 18px 20px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.opt:hover .opt__card { border-color: var(--ink); }
+
+.opt__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.opt__letter {
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 0.9;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  letter-spacing: -0.05em;
+}
+
+.opt__plato {
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.opt input:checked + .opt__card {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+.opt input:checked + .opt__card .opt__letter { color: var(--orange); }
+.opt input:checked + .opt__card .opt__plato { color: var(--cream); }
+.opt input:checked + .opt__card .label { color: var(--ink-faded); }
+
+.opt input:focus-visible + .opt__card { outline: 2px solid var(--orange); outline-offset: 2px; }
+
+.skip {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 2px;
+}
+
+.skip input { accent-color: var(--orange); }
+
+.day--off .day__options {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--ink-muted);
+  font-size: 20px;
+  display: block;
+}
+
+@media (max-width: 760px) {
+  .day { grid-template-columns: 1fr; gap: 16px; padding: 28px 0; }
+  .day__header { display: flex; align-items: baseline; justify-content: space-between; }
+  .day__status { margin-top: 0; }
+  .day__name { font-size: 30px; }
+  .day__options { grid-template-columns: 1fr; gap: 8px; }
+  .opt__card { flex-direction: row; align-items: center; gap: 16px; padding: 14px 16px; }
+  .opt__top { flex-direction: column; align-items: flex-start; gap: 2px; min-width: 64px; }
+  .field { padding: 20px; }
+}
+
+/* ---------------------------------------------------
+   ENVIAR
+   --------------------------------------------------- */
+.submit-bar {
+  margin-top: 40px;
+}
+
+.submit {
+  width: 100%;
+  padding: 20px;
+  background: var(--orange);
+  color: var(--cream);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background 0.3s ease;
+}
+
+.submit:hover { background: var(--orange-deep); }
+.submit:disabled { background: var(--ink-faded); cursor: wait; }
+
+.note {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 14px;
+  text-align: center;
+}
+
+.error {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--orange);
+  background: rgba(212, 80, 31, 0.08);
+  color: var(--orange-deep);
+  font-size: 15px;
+}
+
+/* ---------------------------------------------------
+   ESTADOS: cargando / error / confirmado
+   --------------------------------------------------- */
+.state {
+  padding: 80px 0;
+  border-top: 1px solid var(--ink);
+}
+
+.state h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(36px, 6vw, 64px);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.state h2 span { color: var(--orange); }
+
+.state p { color: var(--ink-soft); max-width: 50ch; }
+
+.recap {
+  margin: 32px 0;
+  list-style: none;
+  border-top: 1px solid var(--line-strong);
+}
+
+.recap li {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.recap li span:last-child { color: var(--ink-soft); }
+
+.btn-ghost {
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 3px;
+}
+
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+
+.demo-banner {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  padding: 8px var(--pad-page);
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 24px var(--pad-page);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faded);
+}
+
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="demo-banner" id="demo-banner" hidden>Modo demo · los pedidos no se guardan</div>
+
+<nav class="nav">
+  <a href="/" class="nav__brand">Viands Sur <span>Pedidos</span></a>
+  <span class="label" id="nav-empresa"></span>
+</nav>
+
+<main>
+  <!-- Cargando -->
+  <section class="state" id="s-loading">
+    <p class="label">Cargando el menú…</p>
+  </section>
+
+  <!-- Error / link inválido -->
+  <section class="state" id="s-error" hidden>
+    <h2>Ups, <span>algo falló.</span></h2>
+    <p id="s-error-msg"></p>
+  </section>
+
+  <!-- Formulario -->
+  <form id="s-form" hidden novalidate>
+    <header class="head">
+      <div class="head__meta">
+        <span class="label" id="h-semana"></span>
+        <span class="pill" id="h-cierre"></span>
+      </div>
+      <h1>El menú de <em>la semana.</em></h1>
+      <p class="head__lede">Elegí una opción por día. Si un día no comés, marcá “No pido”.</p>
+    </header>
+
+    <div class="field">
+      <label class="label" for="nombre">Tu nombre y apellido</label>
+      <input id="nombre" name="nombre" autocomplete="name" maxlength="80" required placeholder="Ej: Juan Pérez">
+    </div>
+
+    <div id="days"></div>
+
+    <div class="field" style="margin-top:40px">
+      <label class="label" for="obs">Observaciones (opcional)</label>
+      <textarea id="obs" name="obs" maxlength="300" placeholder="Alergias, sin sal, etc."></textarea>
+    </div>
+
+    <div class="submit-bar">
+      <div class="error" id="form-error" role="alert" hidden></div>
+      <button type="submit" class="submit" id="submit-btn">
+        Enviar mi pedido
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1 8h13m0 0L9 3m5 5l-5 5" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <p class="note">Si te equivocás, volvé a cargarlo con el mismo nombre antes del cierre y se reemplaza.</p>
+    </div>
+  </form>
+
+  <!-- Confirmado -->
+  <section class="state" id="s-done" hidden>
+    <h2>¡Listo, <span id="done-name"></span>!</h2>
+    <p id="done-msg">Tu pedido quedó registrado.</p>
+    <ul class="recap" id="recap"></ul>
+    <button type="button" class="btn-ghost" id="edit-btn">Modificar mi pedido</button>
+  </section>
+</main>
+
+<footer>
+  <span>© 2026 Viands Sur · Cepreco S.R.L.</span>
+  <span>Hecho en Buenos Aires</span>
+</footer>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const codigo = new URLSearchParams(location.search).get('e') || '';
+  const DEMO = !API_URL;
+  let menu = null;
+
+  const DEMO_MENU = {
+    ok: true,
+    empresa: 'Empresa Demo',
+    semana: 'Semana del 12 al 16 de octubre',
+    cierre: new Date(Date.now() + 3 * 86400000).toISOString(),
+    abierto: true,
+    opciones: [
+      { key: 'A', label: 'Clásico' },
+      { key: 'B', label: 'Ensalada' },
+      { key: 'C', label: 'Liviano' },
+    ],
+    dias: [
+      { dia: 'Lunes',     platos: { A: 'Milanesa de ternera con puré', B: 'César con pollo grillado', C: 'Merluza al vapor con vegetales' } },
+      { dia: 'Martes',    platos: { A: 'Ñoquis con bolognesa', B: 'Caprese con rúcula', C: 'Pechuga grillada con calabaza' } },
+      { dia: 'Miércoles', platos: { A: 'Pollo al horno con papas', B: 'Quinoa, garbanzos y palta', C: 'Tortilla de espinaca' } },
+      { dia: 'Jueves',    platos: {} },
+      { dia: 'Viernes',   platos: { A: 'Tarta de jamón y queso', B: 'Mediterránea con queso feta', C: 'Hamburguesa de lentejas' } },
+    ],
+  };
+
+  function show(id) {
+    ['s-loading', 's-error', 's-form', 's-done'].forEach((s) => { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  function fail(msg) {
+    $('s-error-msg').textContent = msg;
+    show('s-error');
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function fmtCierre(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'numeric' }) +
+      ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' h';
+  }
+
+  async function load() {
+    if (DEMO) {
+      $('demo-banner').hidden = false;
+      return DEMO_MENU;
+    }
+    if (!codigo) throw new Error('Este link no es válido. Pedile a Viands Sur el link de tu empresa.');
+    const res = await fetch(API_URL + '?e=' + encodeURIComponent(codigo));
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'No pudimos cargar el menú.');
+    return data;
+  }
+
+  function render(m) {
+    menu = m;
+    $('nav-empresa').textContent = m.empresa;
+    $('h-semana').textContent = m.semana;
+
+    const pill = $('h-cierre');
+    if (m.abierto) {
+      pill.textContent = m.cierre ? 'Abierto hasta el ' + fmtCierre(m.cierre) : 'Pedidos abiertos';
+    } else {
+      pill.textContent = 'Pedidos cerrados';
+      pill.classList.add('pill--closed');
+    }
+
+    $('days').innerHTML = m.dias.map((d, i) => {
+      const keys = m.opciones.filter((o) => d.platos[o.key]);
+      if (!keys.length) {
+        return `<section class="day day--off">
+          <div class="day__header"><h2 class="day__name">${esc(d.dia)}</h2></div>
+          <div class="day__options">Sin servicio este día.</div>
+        </section>`;
+      }
+      const opts = keys.map((o) => `
+        <label class="opt">
+          <input type="radio" name="d${i}" value="${esc(o.key)}">
+          <span class="opt__card">
+            <span class="opt__top">
+              <span class="opt__letter">${esc(o.key)}</span>
+              <span class="label">${esc(o.label)}</span>
+            </span>
+            <span class="opt__plato">${esc(d.platos[o.key])}</span>
+          </span>
+        </label>`).join('');
+      return `<section class="day" data-day="${i}">
+        <div class="day__header">
+          <h2 class="day__name">${esc(d.dia)}</h2>
+          <p class="day__status" id="st${i}">Sin elegir</p>
+        </div>
+        <div class="day__options" role="radiogroup" aria-label="${esc(d.dia)}">
+          ${opts}
+          <label class="skip"><input type="radio" name="d${i}" value=""> No pido este día</label>
+        </div>
+      </section>`;
+    }).join('');
+
+    $('days').addEventListener('change', (e) => {
+      const day = e.target.closest('.day');
+      if (!day) return;
+      const st = $('st' + day.dataset.day);
+      const v = e.target.value;
+      st.textContent = v ? 'Opción ' + v : 'No pide';
+      st.classList.toggle('done', !!v);
+    });
+
+    try { $('nombre').value = localStorage.getItem('vs_nombre') || ''; } catch (_) {}
+
+    if (!m.abierto) {
+      $('s-form').querySelectorAll('input, textarea, button').forEach((el) => { el.disabled = true; });
+      $('submit-btn').textContent = 'Los pedidos de esta semana ya cerraron';
+    }
+
+    show('s-form');
+  }
+
+  function collect() {
+    const elecciones = {};
+    const faltan = [];
+    menu.dias.forEach((d, i) => {
+      if (!menu.opciones.some((o) => d.platos[o.key])) return;
+      const sel = document.querySelector(`input[name="d${i}"]:checked`);
+      if (!sel) faltan.push(d.dia);
+      else elecciones[d.dia] = sel.value;
+    });
+    return { elecciones, faltan };
+  }
+
+  function formError(msg) {
+    const el = $('form-error');
+    el.textContent = msg;
+    el.hidden = !msg;
+  }
+
+  $('s-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formError('');
+
+    const nombre = $('nombre').value.replace(/\s+/g, ' ').trim();
+    if (nombre.length < 3) {
+      formError('Escribí tu nombre y apellido.');
+      $('nombre').focus();
+      return;
+    }
+
+    const { elecciones, faltan } = collect();
+    if (faltan.length) {
+      formError('Te falta elegir: ' + faltan.join(', ') + '. Si no comés ese día, marcá “No pido”.');
+      return;
+    }
+    if (!Object.values(elecciones).some(Boolean)) {
+      formError('Elegí al menos un día.');
+      return;
+    }
+
+    const btn = $('submit-btn');
+    btn.disabled = true;
+    btn.firstChild.textContent = 'Enviando… ';
+
+    try {
+      const payload = { e: codigo, nombre, elecciones, obs: $('obs').value.trim() };
+      let r = { ok: true };
+      if (!DEMO) {
+        // text/plain evita el preflight CORS que Apps Script no soporta
+        const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+        r = await res.json();
+      }
+      if (!r.ok) throw new Error(r.error || 'No se pudo guardar el pedido.');
+
+      try { localStorage.setItem('vs_nombre', nombre); } catch (_) {}
+      done(nombre, elecciones, r.actualizado);
+    } catch (err) {
+      formError(err.message || 'No se pudo enviar. Revisá tu conexión e intentá de nuevo.');
+    } finally {
+      btn.disabled = false;
+      btn.firstChild.textContent = 'Enviar mi pedido ';
+    }
+  });
+
+  function done(nombre, elecciones, actualizado) {
+    $('done-name').textContent = nombre.split(' ')[0];
+    $('done-msg').textContent = actualizado
+      ? 'Actualizamos tu pedido. Este es el que vale:'
+      : 'Tu pedido quedó registrado para la ' + menu.semana.toLowerCase() + ':';
+    $('recap').innerHTML = menu.dias.map((d) => {
+      const k = elecciones[d.dia];
+      const txt = k ? k + ' · ' + d.platos[k] : (d.dia in elecciones ? 'No pide' : 'Sin servicio');
+      return `<li><span class="label">${esc(d.dia)}</span><span>${esc(txt)}</span></li>`;
+    }).join('');
+    show('s-done');
+  }
+
+  $('edit-btn').addEventListener('click', () => show('s-form'));
+
+  load().then(render).catch((err) => fail(err.message || 'No pudimos cargar el menú.'));
+})();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@ Página `/pedidos` donde los empleados de cada empresa cliente eligen su almuerz
 Los pedidos llegan a un **Google Sheet** tuyo, agrupados por empresa. Costo: $0.
 
 ```
-Empleado (celular) ──► viands-sur.vercel.app/pedidos?e=acme ──► Google Apps Script ──► Google Sheet
+Empleado (celular) ──► pedidos.viandssur.com/?e=acme ──►        Google Apps Script ──► Google Sheet
                                                                                        ├─ Menu      (lo cargás vos)
                                                                                        ├─ Empresas  (códigos de link)
                                                                                        ├─ Pedidos   (una fila por persona)
@@ -30,7 +30,7 @@ En la hoja **Empresas** agregá una fila: `Código | Nombre`, ej: `acme | ACME S
 El link para mandarles es:
 
 ```
-https://viands-sur.vercel.app/pedidos?e=acme
+https://pedidos.viandssur.com/?e=acme
 ```
 
 Usá un código no obvio si querés que nadie de afuera adivine el link (ej: `acme-7k2`).
